@@ -1,0 +1,76 @@
+# LAMMPS script for simulating a 2D box with dimer and solvent atoms
+
+# Initialization
+clear
+units lj
+dimension 2
+boundary p p p
+atom_style atomic
+
+# Atom definitions
+atom_modify map array
+
+
+# Create atoms
+variable d equal 2
+variable s equal 36
+
+# Create simulation box
+lattice custom 1.0 a1 3.0 0.0 0.0 a2 0.0 1.0 0.0 basis 0.0 0.0 0.0
+region box block 0 6 0 6 -0.1 0.1 units box
+create_box 2 box
+# Define atom types and masses
+mass 1 1.0
+mass 2 1.0
+
+# Create dimer atoms
+#create_atoms 1 random $d 1234 box
+
+variable p equal 2.75
+variable q equal 3.0
+variable r equal 3.25
+
+# First atom of dimer
+create_atoms 1 single $p $q 0
+
+# Second atom of dimer
+create_atoms 1 single $r $q 0
+
+
+# Create solvent atoms
+lattice custom 1.0 a1 1.0 0.0 0.0 a2 0.0 1.0 0.0 basis 0.0 0.0 0.0
+region solvent_region block 0 6 0 6 -0.1 0.1 units box
+create_atoms 2 random $s 5678 solvent_region
+
+# Define interatomic potentials
+pair_style lj/cut 2.5
+pair_coeff 1 1 1 0.0 
+pair_coeff 1 2 1 0.0
+pair_coeff 2 2 1 0.0
+
+
+# Define settings
+neighbor 0.3 bin
+neigh_modify delay 0 every 1 check yes
+
+# Define integrator
+timestep 0.001
+#fix 1 all nve
+#fix 1 all nvt temp 2.0 2.0 0.1
+#fix 2 all enforce2d
+velocity all create 2.0 87287
+
+
+fix 1 all nvt temp 2.0 2.0 0.1
+#fix 2 all enforce2d
+
+group system region box
+
+# Output settings
+thermo_style custom step temp atoms ke pe etotal
+#dump 2 system custom 1000 dump.custom x y z
+dump 1 all xyz 10000 dump.metal.xyz
+thermo 100000
+
+# Run the simulation
+run 1000000000
