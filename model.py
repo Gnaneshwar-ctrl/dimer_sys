@@ -150,6 +150,7 @@ reshapedy_column_3 = output_2_n.reshape((-1, 1))
 
 # Combine the columns into a single input array
 y_data_2 = np.concatenate((reshapedy_column_2, reshapedy_column_3), axis=1)
+#y_data_2 = np.repeat(y_data_2, len(output_1) // len(y_data_2), axis=0)
 
 # Print the arrays
 #print("2nd Column:")
@@ -170,8 +171,9 @@ def convert_matrix(original_matrix, m):
     return new_matrix
 
 
-y_data = convert_matrix(y_data_2, 72)
+y_data = convert_matrix(y_data_2, 150001)
 y_data = np.array(y_data)
+y_data = y_data.reshape((-1, 1))
 print(y_data)
 
 # Compile the model
