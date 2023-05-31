@@ -158,26 +158,44 @@ y_data_2 = np.concatenate((reshapedy_column_2, reshapedy_column_3), axis=1)
 #print("3rd Column:")
 #print(output_2)
 
-def convert_matrix(original_matrix, m):
-    original_rows, original_cols = len(original_matrix), len(original_matrix[0])
-    new_matrix = [[0] * m for _ in range(72)]  # Create an empty 72xm matrix
+#def convert_matrix(original_matrix, m):
+#    original_rows, original_cols = len(original_matrix), len(original_matrix[0])
+#    new_matrix = [[0] * m for _ in range(72)]  # Create an empty 72xm matrix
     
-    for row in range(72):
-        for col in range(m):
-            original_row = row % original_rows
-            original_col = col % original_cols
-            new_matrix[row][col] = original_matrix[original_row][original_col]
+#    for row in range(72):
+#        for col in range(m):
+#            original_row = row % original_rows
+#            original_col = col % original_cols
+#            new_matrix[row][col] = original_matrix[original_row][original_col]
     
-    return new_matrix
+#    return new_matrix
 
+target_columns = 72
 
-y_data = convert_matrix(y_data_2, 150001)
+def expand_matrix(matrix, target_columns):
+    rows = len(matrix)
+    expanded_matrix = np.full((rows, target_columns), np.nan)
+
+    for i in range(rows):
+        for j in range(target_columns):
+            index = (i * target_columns + j) % 2
+            expanded_matrix[i, j] = matrix[i, index]
+
+    return expanded_matrix
+
+y_data = expand_matrix(y_data_2, 72)
 y_data = np.array(y_data)
-y_data = y_data.reshape((-1, 1))
+#y_data = y_data.reshape((-1, 1))
 print(y_data)
 
+
+def kl_divergence_loss(y_true, y_pred):
+    kl_loss = tf.keras.losses.KLDivergence()(y_true, y_pred)
+    return kl_loss
+
+
 # Compile the model
-model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+model.compile(optimizer='adam', loss=kl_divergence_loss, metrics=['accuracy'])
 
 # Train the model
 model.fit(x_data, y_data, batch_size=32, epochs=100, validation_split=0.2)
