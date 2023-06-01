@@ -1,0 +1,40 @@
+# Initialize
+clear
+units lj
+dimension 2
+boundary p p p
+atom_style atomic
+
+# Read data file
+read_data atoms.data
+
+# LJ potential
+pair_style lj/cut 2.5
+pair_coeff 1 1 1.0 0 2.5
+pair_coeff 2 2 1.0 0 2.5
+pair_coeff 1 2 1.0 0 2.5
+
+# Define integrator and time step
+timestep 0.001
+neighbor 0.3 bin
+neigh_modify delay 0 every 1 check yes
+velocity all create 2.0 87287
+#fix 1 all nve
+fix 1 all nvt temp 2.0 2.0 0.1
+
+
+# Define output
+#thermo 1000
+#thermo_style custom step pe
+
+# Run simulation
+#run 10000
+
+# Output settings
+thermo_style custom step temp atoms ke pe etotal
+#dump 2 system custom 1000 dump.custom x y z
+dump 1 all xyz 10000 dump.metal.xyz
+thermo 100000
+
+# Run the simulation
+run 1000000000
